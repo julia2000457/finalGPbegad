@@ -8,6 +8,23 @@ import requests
 import time
 from skimage.feature import peak_local_max
 
+
+import requests
+import json
+R = requests.post('http://nova.astrometry.net/api/login', data={'request-json': json.dumps({"apikey": "yaumjfujcxtspqvo"})})
+print(R.text)
+
+import numpy as np
+from scipy.ndimage import gaussian_filter, label
+from astropy.io import fits
+from astroquery.vizier import Vizier
+from astropy.coordinates import SkyCoord
+import astropy.units as u
+import requests
+import time
+from skimage.feature import peak_local_max
+import json
+
 def detect_stars(image_data, threshold=5, min_distance=5):
     """Detect stars in the image data using Gaussian filter and peak local maxima."""
     # Apply a Gaussian filter to smooth the image
@@ -39,32 +56,59 @@ def fetch_star_catalog(ra, dec, radius=1):
     else:
         return None
 
-def solve_astrometry(image_path, api_key):
-    """Solve astrometry using astrometry.net API."""
-    upload_url = 'http://nova.astrometry.net/api/upload'
-    headers = {'apikey': api_key}
+def login_to_astrometry(api_key):
+    """Login to astrometry.net and get session key."""
+    login_url = 'http://nova.astrometry.net/api/login'
+    data = {'request-json': json.dumps({"apikey": api_key})}
     
-    with open(image_path, 'rb') as image_file:
-        files = {'file': image_file}
-        response = requests.post(upload_url, headers=headers, files=files)
+    response = requests.post(login_url, data=data)
     
     if response.status_code == 200:
         response_json = response.json()
-        job_id = response_json.get('subid')
-        return job_id
+        session_key = response_json.get('session')
+        if session_key:
+            return session_key
+        else:
+            print("Login failed, session key not found.")
+            print("Response text:", response.text)
+            return None
+    else:
+        print("Failed to login to astrometry.net")
+        print("Response status code:", response.status_code)
+        print("Response text:", response.text)
+        return None
+
+def solve_astrometry(image_path, session_key):
+    """Solve astrometry using astrometry.net API."""
+    upload_url = 'http://nova.astrometry.net/api/upload'
+    data = {'request-json': json.dumps({'session': session_key})}
+    
+    with open(image_path, 'rb') as image_file:
+        files = {'file': image_file}
+        response = requests.post(upload_url, data=data, files=files)
+    
+    if response.status_code == 200:
+        response_json = response.json()
+        if 'subid' in response_json:
+            job_id = response_json['subid']
+            return job_id
+        else:
+            print("Upload failed, server returned an error.")
+            print("Response text:", response.text)
+            return None
     else:
         print("Failed to upload image to astrometry.net")
         print("Response status code:", response.status_code)
         print("Response text:", response.text)
         return None
 
-def check_astrometry_status(job_id, api_key):
+def check_astrometry_status(job_id, session_key):
     """Check the status of the astrometry job."""
     status_url = f'http://nova.astrometry.net/api/jobs/{job_id}'
-    headers = {'apikey': api_key}
+    data = {'request-json': json.dumps({'session': session_key})}
     
     while True:
-        response = requests.get(status_url, headers=headers)
+        response = requests.get(status_url, params=data)
         if response.status_code == 200:
             response_json = response.json()
             status = response_json.get('status')
@@ -114,12 +158,19 @@ def process_image(image_path, api_key):
         print("Catalog data fetched successfully.")
         # Here you would typically match detected stars with catalog data
     
+    # Login to astrometry.net and get session key
+    session_key = login_to_astrometry(api_key)
+    
+    if not session_key:
+        print("Failed to obtain session key.")
+        return
+    
     # Solve astrometry
-    job_id = solve_astrometry(image_path, api_key)
+    job_id = solve_astrometry(image_path, session_key)
     
     if job_id:
         print(f"Astrometry job submitted, job ID: {job_id}")
-        result = check_astrometry_status(job_id, api_key)
+        result = check_astrometry_status(job_id, session_key)
         
         if result:
             print("Astrometry solved successfully:", result)
@@ -128,17 +179,13 @@ def process_image(image_path, api_key):
     else:
         print("Failed to submit astrometry job.")
 
-
-
-
 if __name__ == "__main__":
     # Path to the FITS image file
-    image=r"C:\Users\USER\Desktop\finalGPbegad\fits\NEOS_SCI_2024001000555.fits"
+    image_path = r"C:\Users\USER\Desktop\finalGPbegad\fits\NEOS_SCI_2024001000555.fits"
     
     # Your astrometry.net API key
     api_key = 'yaumjfujcxtspqvo'
     
-    process_image(image, api_key)
-   
+    process_image(image_path, api_key)
 
 
