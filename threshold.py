@@ -84,7 +84,7 @@ def iterative_thresholding(img):
         new_threshold = (foreground_mean + background_mean) / 2
 
         # Check for convergence
-        if abs(threshold - new_threshold) < 0.5:
+        if abs(threshold - new_threshold) < 0.1:
             break
 
         # Update the threshold

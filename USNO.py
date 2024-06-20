@@ -181,7 +181,7 @@ def process_image(image_path, api_key):
 
 if __name__ == "__main__":
     # Path to the FITS image file
-    image_path = r"E:\finalGPbegad\fits\NEOS_SCI_2024001000555.fits"
+    image_path = r"C:\Users\USER\Desktop\finalGPbegad\fits\NEOS_SCI_2024001000555.fits"
     
     # Your astrometry.net API key
     api_key = 'kicxdposandvygae'
