@@ -90,7 +90,8 @@ def iterative_thresholding(img):
         # Update the threshold
         threshold = new_threshold
 
-    return thresholded_img, threshold
+    return threshold
+    # return thresholded_img, threshold
 
 # Example usage
 if __name__ == "__main__":

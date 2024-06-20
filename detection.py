@@ -112,7 +112,6 @@
 
 
 
-
 import os
 import cv2
 import numpy as np
@@ -122,9 +121,13 @@ from conversion import convert_fits_to_image  # Ensure these modules are availab
 from threshold import iterative_thresholding
 
 class DebrisAnalyzer:
-    def __init__(self, threshed_directory, csv_file_path):
+    def __init__(self, threshed_directory, output_directory, csv_file_path):
         self.threshed_directory = threshed_directory
+        self.output_directory = output_directory
         self.csv_file_path = csv_file_path
+
+        # Ensure the output directory exists
+        os.makedirs(self.output_directory, exist_ok=True)
 
     def moment_of_inertia(self, xWidth, yHeight, xCG, yCG):
         Ixx = sum((y - yCG)**2 for y in yHeight)
@@ -216,18 +219,18 @@ class DebrisAnalyzer:
 
                     # Write the row to the CSV file
                     csvwriter.writerow([fits_filename, object_id, area_iterative, edge_count, center_x, center_y, w, h, lbp_mean, lbp_std, prediction])
-                    
+
                     # Increment Id
                     object_id += 1
 
-                # Save the output image with highlighted celestial objects
-                output_highlighted_image_filename = os.path.join(self.threshed_directory, os.path.splitext(fits_filename)[0] + '_highlighted.png')
-                cv2.imwrite(output_highlighted_image_filename, image)
+                # Save the output image with highlighted celestial objects in the output directory
+                highlighted = os.path.join(self.output_directory, os.path.splitext(fits_filename)[0] + '_highlighted.png')
+                cv2.imwrite(highlighted, image)
 
 # Example usage
 if __name__ == "__main__":
     # Instantiate DebrisAnalyzer
-    analyzer = DebrisAnalyzer(threshed_directory=r"C:\Users\USER\Desktop\Space-Debris-Project\OOP\Detection\images_Preprocessing\iter_images", csv_file_path=r"C:\Users\USER\Desktop\finalGPbegad\sim_debris.csv")
+    analyzer = DebrisAnalyzer(threshed_directory=r"c:\Users\Aziz\Desktop\julia\Space-Debris-Project-1\OOP\Detection\images_Preprocessing\iter_images", output_directory=r"E:\finalGPbegad\Highlighted", csv_file_path=r"E:\finalGPbegad\sim_debris.csv")
     # Debugging: Print out the path
     print("Threshed directory:", analyzer.threshed_directory)
     # Process images
