@@ -1,8 +1,7 @@
-import cv2
-import os
-import numpy as np
-
-def iterative_thresholding_folder(input_folder, output_folder, sub_image_size=(64, 64)):
+import cv2 
+import os 
+import numpy as np 
+def iterative_thresholding_folder(input_folder, output_folder):
     """
     Apply iterative thresholding to images in the input folder and save the thresholded images in the output folder.
     """
@@ -16,46 +15,14 @@ def iterative_thresholding_folder(input_folder, output_folder, sub_image_size=(6
         image_path = os.path.join(input_folder, filename)
         img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
 
-        if img is None:
-            print(f"Skipping file {filename}: Not a valid image.")
-            continue
-
-        # Apply iterative thresholding to sub-images
-        thresholded_img = apply_thresholding_to_sub_images(img, sub_image_size)
+        # Apply iterative thresholding
+        thresholded_img, guessed_threshold = iterative_thresholding(img)
 
         # Write the thresholded image to the output folder
         output_path = os.path.join(output_folder, filename)
         cv2.imwrite(output_path, thresholded_img)
 
         print(f"Thresholded image saved: {output_path}")
-
-def apply_thresholding_to_sub_images(img, sub_image_size):
-    """
-    Divide the image into sub-images, apply iterative thresholding to each sub-image, and combine them.
-    """
-    h, w = img.shape
-    sub_h, sub_w = sub_image_size
-
-    # Create an empty image to store the thresholded result
-    thresholded_img = np.zeros((h, w), dtype=np.uint8)
-
-    # Iterate over sub-images
-    for i in range(0, h, sub_h):
-        for j in range(0, w, sub_w):
-            sub_img = img[i:i+sub_h, j:j+sub_w]
-            if sub_img.size == 0:
-                continue
-
-            # Apply median filter to remove hot pixels or cosmic rays
-            filtered_sub_img = cv2.medianBlur(sub_img, 3)
-
-            # Apply iterative thresholding
-            thresholded_sub_img, _ = iterative_thresholding(filtered_sub_img)
-
-            # Place the thresholded sub-image back into the result image
-            thresholded_img[i:i+sub_h, j:j+sub_w] = thresholded_sub_img
-
-    return thresholded_img
 
 def iterative_thresholding(img):
     """
@@ -70,31 +37,18 @@ def iterative_thresholding(img):
         _, thresholded_img = cv2.threshold(img, threshold, 255, cv2.THRESH_BINARY)
 
         # Calculate the mean pixel values for foreground and background
-        foreground_pixels = img[thresholded_img == 255]
-        background_pixels = img[thresholded_img == 0]
+        foreground_mean = np.mean(img[thresholded_img == 255])
+        background_mean = np.mean(img[thresholded_img == 0])
 
-        # Check if foreground or background is empty
-        if foreground_pixels.size == 0 or background_pixels.size == 0:
-            break
-
-        foreground_mean = np.mean(foreground_pixels) if foreground_pixels.size > 0 else 0
-        background_mean = np.mean(background_pixels) if background_pixels.size > 0 else 0
-
-        # Update the threshold using the means of foreground and background
+        # Update the threshold using Otsu's method
         new_threshold = (foreground_mean + background_mean) / 2
 
         # Check for convergence
-        if abs(threshold - new_threshold) < 0.1:
+        if abs(threshold - new_threshold) < 0.5:
             break
 
         # Update the threshold
         threshold = new_threshold
 
-    return threshold
-    # return thresholded_img, threshold
+    return thresholded_img, threshold
 
-# Example usage
-if __name__ == "__main__":
-    input_folder = r'C:\Users\USER\Desktop\finalGPbegad\images'  # Specify the path to your input folder
-    output_folder = r'C:\Users\USER\Desktop\finalGPbegad\threshold'  # Specify the path to your output folder
-    iterative_thresholding_folder(input_folder, output_folder)
