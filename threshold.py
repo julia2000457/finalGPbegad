@@ -29,7 +29,7 @@ def iterative_thresholding(img):
     Apply iterative thresholding to the input image and return the thresholded image along with the guessed threshold.
     """
     # Initial guess for threshold
-    threshold = 128
+    threshold = 120
 
     # Loop until convergence
     while True:

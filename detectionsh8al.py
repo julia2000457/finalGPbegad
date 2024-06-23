@@ -26,10 +26,11 @@ class DebrisAnalyzer:
         Imain2 = 0.5 * (Ixx + Iyy - np.sqrt((Ixx - Iyy)**2 + 4*(Ixy)**2))
         epsilonn = 12
         final_inertia = Imain1 / Imain2
-        if final_inertia > epsilonn:
-            return 'Debris'
-        else:
-            return 'Celestial Object'
+        return final_inertia
+        # if final_inertia > epsilonn:
+        #     return 'Debris'
+        # else:
+        #     return 'Celestial Object'
 
     def process_images(self):
         fitsfiles = os.listdir(self.threshed_directory)
@@ -110,14 +111,14 @@ class DebrisAnalyzer:
                         Ixx, Iyy, Ixy, yHeight, xWidth)
 
                     # Highlight celestial objects in the output image and write the row to the CSV file
-                    if prediction == 'Celestial Object':
-                        cv2.rectangle(
-                            image, (x, y), (x + w, y + h), (255, 0, 0), 2)  # Blue bounding box for celestial objects
-                        cv2.putText(image, str(object_id), (x, y - 5),
-                                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-                        # Write the row to the CSV file
-                        csvwriter.writerow([fits_filename, object_id, area_iterative, edge_count,
-                                           center_x, center_y, w, h, lbp_mean, lbp_std, prediction])
+                    # if prediction == 'Celestial Object':
+                    cv2.rectangle(
+                        image, (x, y), (x + w, y + h), (255, 0, 0), 2)  # Blue bounding box for celestial objects
+                    cv2.putText(image, str(object_id), (x, y - 5),
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+                    # Write the row to the CSV file
+                    csvwriter.writerow([fits_filename, object_id, area_iterative, edge_count,
+                                        center_x, center_y, w, h, lbp_mean, lbp_std, prediction])
 
                     # Increment Id
                     object_id += 1
