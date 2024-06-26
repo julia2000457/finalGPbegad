@@ -23,7 +23,7 @@ image_with_blobs = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
 
 # Set thresholds for standard deviation and area
 std_threshold = 30  # Adjust this threshold value as needed
-area_threshold = 500  # Adjust this threshold value as needed
+area_threshold = 5 # Adjust this threshold value as needed
 
 # Iterate over each detected blob (skip the first label, which is the background)
 for label in range(1, num_labels):
@@ -45,13 +45,13 @@ for label in range(1, num_labels):
     # Determine the area of the blob
     area = stats[label][cv2.CC_STAT_AREA]
     
-    # Calculate LBP features
-    roi = image[y:y+h, x:x+w]
-    lbp_features = feature.local_binary_pattern(roi, P=8, R=1, method='uniform')
-    lbp_mean = np.mean(lbp_features)
-    lbp_std = np.std(lbp_features)
+    # # Calculate LBP features
+    # roi = image[y:y+h, x:x+w]
+    # lbp_features = feature.local_binary_pattern(roi, P=8, R=1, method='uniform')
+    # lbp_mean = np.mean(lbp_features)
+    # lbp_std = np.std(lbp_features)
     
-    print(f"Blob {label}: LBP Mean = {lbp_mean}, LBP Std = {lbp_std}")
+    # print(f"Blob {label}: LBP Mean = {lbp_mean}, LBP Std = {lbp_std}")
     
     # Determine the color of the blob based on std deviation and area
     if std_deviation >= std_threshold and area >= area_threshold:
@@ -64,9 +64,9 @@ for label in range(1, num_labels):
     x, y, w, h = stats[label][:4]  # Extract bounding box coordinates
     cv2.rectangle(image_with_blobs, (x, y), (x + w, y + h), color, 2)  # Draw rectangle
     
-    # Display area as text near the blob
-    label_text = f"Area={area}"
-    cv2.putText(image_with_blobs, label_text, (x, y + h + 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 1, cv2.LINE_AA)
+    # # Display area as text near the blob
+    # label_text = f"Area={area}"
+    # cv2.putText(image_with_blobs, label_text, (x, y + h + 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 1, cv2.LINE_AA)
 
 # Display the thresholded binary image
 plt.figure(figsize=(8, 6))

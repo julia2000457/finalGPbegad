@@ -4,18 +4,18 @@ from matplotlib import pyplot as plt
 import seaborn as sns
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
-from sklearn.svm import SVR
-from sklearn.metrics import mean_squared_error, r2_score
-from sklearn.neighbors import KNeighborsRegressor
-from sklearn.linear_model import LinearRegression
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.tree import DecisionTreeRegressor
+from sklearn.svm import SVC
+from sklearn.metrics import accuracy_score
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.tree import DecisionTreeClassifier
 import xgboost as xgb
 import lightgbm as lgb
 import joblib
 
 # Load dataset
-csv_file_path = 'E:\\blob_analysis_results.csv'
+csv_file_path = 'E:\\finalGPbegad\\blob_analysis_results.csv'
 df = pd.read_csv(csv_file_path)
 df.info()
 
@@ -62,7 +62,7 @@ plt.show()
 df = df.sample(frac=1, random_state=42)
 
 # Split data into features and target
-X = df.drop(['Blob ID', 'Prediction', 'Final Inertia'], axis=1)
+X = df.drop(['Blob ID', 'Prediction'], axis=1)
 y = df['Prediction']
 
 # Split data into training and testing sets
@@ -71,75 +71,75 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
 model_names = []
 accuracies = []
 
-# Support Vector Regression (SVR)
-svm_model = SVR()
-svm_model.fit(X_train, y_train)
-svm_predictions = svm_model.predict(X_test)
-svm_r2 = r2_score(y_test, svm_predictions)
-print(f"SVR R-squared: {svm_r2:.4f}")
-model_names.append("SVR")
-accuracies.append(svm_r2)
+# Support Vector Classifier (SVC)
+svc_model = SVC()
+svc_model.fit(X_train, y_train)
+svc_predictions = svc_model.predict(X_test)
+svc_accuracy = accuracy_score(y_test, svc_predictions)
+print(f"SVC Accuracy: {svc_accuracy:.4f}")
+model_names.append("SVC")
+accuracies.append(svc_accuracy)
 
 # k-Nearest Neighbors (k-NN)
-knn_model = KNeighborsRegressor()
+knn_model = KNeighborsClassifier()
 knn_model.fit(X_train, y_train)
-knn_r2 = knn_model.score(X_test, y_test)
-print(f"KNN R-squared: {knn_r2:.4f}")
+knn_accuracy = knn_model.score(X_test, y_test)
+print(f"KNN Accuracy: {knn_accuracy:.4f}")
 model_names.append("KNN")
-accuracies.append(knn_r2)
+accuracies.append(knn_accuracy)
 
-# Linear Regression
-lr_model = LinearRegression()
+# Logistic Regression
+lr_model = LogisticRegression()
 lr_model.fit(X_train, y_train)
-lr_r2 = lr_model.score(X_test, y_test)
-print(f"Linear Regression R-squared: {lr_r2:.4f}")
+lr_accuracy = lr_model.score(X_test, y_test)
+print(f"Logistic Regression Accuracy: {lr_accuracy:.4f}")
 model_names.append("LR")
-accuracies.append(lr_r2)
+accuracies.append(lr_accuracy)
 
-# Random Forest Regressor
-rf_model = RandomForestRegressor()
-rf_model.fit(X_train, y_train)
-rf_r2 = rf_model.score(X_test, y_test)
-print(f"Random Forest R-squared: {rf_r2:.4f}")
-model_names.append("RF")
-accuracies.append(rf_r2)
+# # Random Forest Classifier
+# rf_model = RandomForestClassifier()
+# rf_model.fit(X_train, y_train)
+# rf_accuracy = rf_model.score(X_test, y_test)
+# print(f"Random Forest Accuracy: {rf_accuracy:.4f}")
+# model_names.append("RF")
+# accuracies.append(rf_accuracy)
 
-# Decision Tree Regressor
-dt_model = DecisionTreeRegressor()
-dt_model.fit(X_train, y_train)
-dt_r2 = dt_model.score(X_test, y_test)
-print(f"Decision Tree R-squared: {dt_r2:.4f}")
-model_names.append("DT")
-accuracies.append(dt_r2)
+# # Decision Tree Classifier
+# dt_model = DecisionTreeClassifier()
+# dt_model.fit(X_train, y_train)
+# dt_accuracy = dt_model.score(X_test, y_test)
+# print(f"Decision Tree Accuracy: {dt_accuracy:.4f}")
+# model_names.append("DT")
+# accuracies.append(dt_accuracy)
 
-# XGBoost Regressor
-xgb_model = xgb.XGBRegressor()
+# XGBoost Classifier
+xgb_model = xgb.XGBClassifier()
 xgb_model.fit(X_train, y_train)
-xgb_r2 = xgb_model.score(X_test, y_test)
-print(f"XGBoost R-squared: {xgb_r2:.4f}")
+xgb_accuracy = xgb_model.score(X_test, y_test)
+print(f"XGBoost Accuracy: {xgb_accuracy:.4f}")
 model_names.append("XGB")
-accuracies.append(xgb_r2)
+accuracies.append(xgb_accuracy)
 
-# LightGBM Regressor
-lgb_model = lgb.LGBMRegressor(verbosity=-1)
+# LightGBM Classifier
+lgb_model = lgb.LGBMClassifier(verbosity=-1)
 lgb_model.fit(X_train, y_train)
-lgb_r2 = lgb_model.score(X_test, y_test)
-print(f"LightGBM R-squared: {lgb_r2:.4f}")
+lgb_accuracy = lgb_model.score(X_test, y_test)
+print(f"LightGBM Accuracy: {lgb_accuracy:.4f}")
 model_names.append("LGBM")
-accuracies.append(lgb_r2)
+accuracies.append(lgb_accuracy)
 
 # Plot model accuracies
 plt.figure(figsize=(10, 8))
 plt.bar(model_names, accuracies, color='skyblue')
 plt.title('Model Comparison')
 plt.xlabel('Model')
-plt.ylabel('R-squared Accuracy')
+plt.ylabel('Accuracy')
 plt.show()
 
 plt.figure(figsize=(10, 10))
 plt.plot(model_names, accuracies, 'r*-')
 plt.xlabel('Model')
-plt.ylabel('R-squared Accuracy')
+plt.ylabel('Accuracy')
 plt.title('Model Accuracy Comparison')
 plt.show()
 

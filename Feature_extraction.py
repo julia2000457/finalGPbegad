@@ -91,11 +91,8 @@ def process_image(image_path, csv_writer):
 
 # List of image paths to process
 image_paths = [
-    'E:\\finalGPbegad\\images\\NEOS_SCI_2024001001404.png',
-    'E:\\finalGPbegad\\images\\NEOS_SCI_2024001000312.png',
-    'E:\\finalGPbegad\\images\\NEOS_SCI_2024001000838.png',
-    'E:\\finalGPbegad\\images\\NEOS_SCI_2024001001121.png',
-    'E:\\finalGPbegad\\images\\NEOS_SCI_2024001000555.png'
+    'E:\\finalGPbegad\\images\\NEOS_SCI_2024001000555.png',
+
     # Add more image paths as needed
 ]
 
